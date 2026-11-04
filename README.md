@@ -8,7 +8,9 @@ Projeto Integrado do curso de Análise e Desenvolvimento de Sistemas (UNOPAR) - 
 2. **Agendamento de faxina** - lê clientes, diaristas e serviços do banco, impede marcar a mesma diarista
    em dia/turno já ocupado e grava o agendamento.
 3. **Agenda do dia** (consulta) - mostra as faxinas de uma data, por diarista, com o total previsto.
-4. Login com senha (hash SHA-256) e perfis Atendente / Diarista.
+4. **Consultar clientes** - lista os clientes com busca por nome ou bairro.
+5. **Relatório mensal** - quantidade de faxinas, valor total, recebido e a receber por diarista, com exportação em CSV.
+6. Login com senha (hash SHA-256) e perfis Atendente / Diarista.
 
 ## Tecnologias
 Java 17+ (Swing), SQLite, driver JDBC `org.xerial:sqlite-jdbc`.
@@ -32,8 +34,9 @@ Usuários de teste: `ana` / `ana123` (atendente), `maria` / `maria123` e `joana`
 ```
 src/br/com/diaristafacil/
   Main.java
-  model/  Cliente, Diarista, Servico, Agendamento, Turno, Usuario
-  dao/    Conexao, ClienteDAO, AgendamentoDAO, CadastroBasicoDAO, UsuarioDAO
-  view/   TelaLogin, TelaPrincipal, TelaClientes, TelaAgendamento, TelaAgendaDia
+  model/  Cliente, Diarista, Servico, Agendamento, Turno, Usuario, ResumoDiarista
+  dao/    Conexao, ClienteDAO, AgendamentoDAO, CadastroBasicoDAO, UsuarioDAO, RelatorioDAO
+  view/   TelaLogin, TelaPrincipal, TelaClientes, TelaConsultaClientes, TelaAgendamento,
+          TelaAgendaDia, TelaRelatorio
 docs/schema.sql
 ```

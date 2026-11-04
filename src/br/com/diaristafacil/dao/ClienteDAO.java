@@ -44,6 +44,23 @@ public class ClienteDAO {
         return lista;
     }
 
+    /** Busca clientes pelo nome ou pelo bairro (usada na tela Consultar clientes). */
+    public List<Cliente> buscar(String texto) throws SQLException {
+        String sql = "SELECT * FROM cliente WHERE nome LIKE ? OR bairro LIKE ? ORDER BY nome";
+        String filtro = "%" + (texto == null ? "" : texto.trim()) + "%";
+        List<Cliente> lista = new ArrayList<>();
+        try (Connection con = Conexao.getConexao(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, filtro);
+            ps.setString(2, filtro);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(montar(rs));
+                }
+            }
+        }
+        return lista;
+    }
+
     static Cliente montar(ResultSet rs) throws SQLException {
         Cliente c = new Cliente(rs.getString("nome"), rs.getString("telefone"),
                 rs.getString("endereco"), rs.getString("bairro"), rs.getString("observacao"));
