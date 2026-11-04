@@ -20,10 +20,17 @@ public class AgendamentoDAO {
      * se choca com o turno pedido (integral ocupa manhã e tarde).
      */
     public boolean diaristaOcupada(int diaristaId, LocalDate data, Turno turno) throws SQLException {
-        String sql = "SELECT turno FROM agendamento WHERE diarista_id = ? AND data = ? AND status <> 'CANCELADO'";
+        return diaristaOcupada(diaristaId, data, turno, 0);
+    }
+
+    /** Mesma verificação, ignorando um agendamento (usado ao remarcar a própria faxina). */
+    public boolean diaristaOcupada(int diaristaId, LocalDate data, Turno turno, int ignorarId) throws SQLException {
+        String sql = "SELECT turno FROM agendamento WHERE diarista_id = ? AND data = ? "
+                + "AND status <> 'CANCELADO' AND id <> ?";
         try (Connection con = Conexao.getConexao(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, diaristaId);
             ps.setString(2, data.toString());
+            ps.setInt(3, ignorarId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     if (Turno.valueOf(rs.getString("turno")).conflitaCom(turno)) {
@@ -58,6 +65,48 @@ public class AgendamentoDAO {
             }
         }
         return a.getId();
+    }
+
+    /** Cancela a faxina (UC05). O registro continua no banco, apenas com status CANCELADO. */
+    public void cancelar(Agendamento a) throws SQLException {
+        a.cancelar();
+        atualizarStatus(a.getId(), a.getStatus());
+    }
+
+    /** Remarca a faxina para outra data/turno (UC05), verificando antes a disponibilidade da diarista. */
+    public void remarcar(Agendamento a, LocalDate novaData, Turno novoTurno)
+            throws SQLException, AgendaOcupadaException {
+        if (diaristaOcupada(a.getDiarista().getId(), novaData, novoTurno, a.getId())) {
+            throw new AgendaOcupadaException(a.getDiarista().getNome()
+                    + " já tem faxina marcada nesse dia e turno. Escolha outro horário.");
+        }
+        String sql = "UPDATE agendamento SET data = ?, turno = ? WHERE id = ?";
+        try (Connection con = Conexao.getConexao(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, novaData.toString());
+            ps.setString(2, novoTurno.name());
+            ps.setInt(3, a.getId());
+            ps.executeUpdate();
+        }
+        a.remarcar(novaData, novoTurno);
+    }
+
+    /** Marca a faxina como paga pelo cliente (UC06). */
+    public void registrarPagamento(Agendamento a) throws SQLException {
+        String sql = "UPDATE agendamento SET pago = 1 WHERE id = ?";
+        try (Connection con = Conexao.getConexao(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, a.getId());
+            ps.executeUpdate();
+        }
+        a.registrarPagamento();
+    }
+
+    private void atualizarStatus(int id, String status) throws SQLException {
+        try (Connection con = Conexao.getConexao();
+             PreparedStatement ps = con.prepareStatement("UPDATE agendamento SET status = ? WHERE id = ?")) {
+            ps.setString(1, status);
+            ps.setInt(2, id);
+            ps.executeUpdate();
+        }
     }
 
     /** Consulta as faxinas de uma data (todas as diaristas), ordenadas por diarista e turno. */

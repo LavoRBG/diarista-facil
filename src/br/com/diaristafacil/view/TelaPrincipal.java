@@ -50,7 +50,7 @@ public class TelaPrincipal extends JFrame {
         btnClientes.addActionListener(e -> new TelaClientes().setVisible(true));
         btnConsultaClientes.addActionListener(e -> new TelaConsultaClientes().setVisible(true));
         btnAgendar.addActionListener(e -> new TelaAgendamento().setVisible(true));
-        btnAgenda.addActionListener(e -> new TelaAgendaDia().setVisible(true));
+        btnAgenda.addActionListener(e -> new TelaAgendaDia(atendente).setVisible(true));
         btnRelatorio.addActionListener(e -> new TelaRelatorio().setVisible(true));
         btnSair.addActionListener(e -> System.exit(0));
 

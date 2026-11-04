@@ -39,6 +39,14 @@ public class Agendamento {
     }
 
     public void cancelar() { this.status = CANCELADO; }
+
+    /** Muda a faxina de dia e/ou turno, mantendo cliente, diarista e serviço. */
+    public void remarcar(LocalDate novaData, Turno novoTurno) {
+        this.data = novaData;
+        this.turno = novoTurno;
+    }
+
+    public void registrarPagamento() { this.pago = true; }
     public void concluir() { this.status = CONCLUIDO; }
 
     public int getId() { return id; }
